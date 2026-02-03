@@ -66,51 +66,45 @@ public class Chicken : MonoBehaviour
     
     void OnCollisionEnter(Collision collision)
     {
-        // Check if enough time has passed since last rotation
-        if (Time.time - lastRotationTime < rotationCooldown)
+        GameObject otherObject = collision.gameObject;
+
+        // Fence: always turn immediately (no cooldown) so chickens never get stuck
+        if (IsFence(otherObject))
         {
+            Rotate180Degrees(ignoreCooldown: true);
             return;
         }
-        
-        GameObject otherObject = collision.gameObject;
-        
-        // First check if collision is with another chicken
+
+        // Chicken: use cooldown to prevent rapid flip-flop when two chickens meet
+        if (Time.time - lastRotationTime < rotationCooldown)
+            return;
+
         if (IsChicken(otherObject))
         {
-            // Both chickens turn 180 degrees
             Rotate180Degrees();
-            
-            // Also make the other chicken turn 180 degrees
             Chicken otherChicken = otherObject.GetComponent<Chicken>();
             if (otherChicken != null)
-            {
                 otherChicken.Rotate180Degrees();
-            }
-            return;
-        }
-        
-        // Check if the collision is with a fence (check both object name and parent)
-        GameObject fenceObject = collision.gameObject;
-        bool isFence = false;
-        
-        // Check the collided object's name
-        if (fenceObject.name.Contains("Fence"))
-        {
-            isFence = true;
-        }
-        // Also check parent object name (fences might be children)
-        else if (fenceObject.transform.parent != null && fenceObject.transform.parent.name.Contains("Fence"))
-        {
-            isFence = true;
-        }
-        
-        if (isFence)
-        {
-            // Turn 180 degrees away from the fence
-            Rotate180Degrees();
         }
     }
     
+    /// <summary>
+    /// Returns true if the object is (or is a child of) a fence, so we turn around.
+    /// Checks tag "Fence" and walks up the hierarchy for names containing "Fence".
+    /// </summary>
+    private bool IsFence(GameObject obj)
+    {
+        if (obj == null) return false;
+        if (obj.CompareTag("Fence")) return true;
+        Transform t = obj.transform;
+        while (t != null)
+        {
+            if (t.name.Contains("Fence")) return true;
+            t = t.parent;
+        }
+        return false;
+    }
+
     private bool IsChicken(GameObject obj)
     {
         // Check if the object has a Chicken component
@@ -134,14 +128,12 @@ public class Chicken : MonoBehaviour
         return false;
     }
     
-    public void Rotate180Degrees()
+    /// <param name="ignoreCooldown">If true, rotate even during cooldown (used for fence so chickens don't get stuck).</param>
+    public void Rotate180Degrees(bool ignoreCooldown = false)
     {
-        // Check if enough time has passed since last rotation
-        if (Time.time - lastRotationTime < rotationCooldown)
-        {
+        if (!ignoreCooldown && Time.time - lastRotationTime < rotationCooldown)
             return;
-        }
-        
+
         isRotating = true;
         lastRotationTime = Time.time;
         
