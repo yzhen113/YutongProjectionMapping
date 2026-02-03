@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 13966, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: SimpleQuadDeformer 1
+  m_EditorClassIdentifier: 
+  templateScene: {fileID: 102900000, guid: 4551e2fa63765fb4b84aa0973b840fb1, type: 3}
+  templateName: 
+  description: 
+  preview: {fileID: 0}
+  dependencies:
+  - dependency: {fileID: 2800000, guid: 4112e70f0616b37439c8019a0fca9864, type: 3}
+    instantiationMode: 0
+  - dependency: {fileID: 2800000, guid: 80f01af40b4c228429130ad582ddeb63, type: 3}
+    instantiationMode: 0
+  - dependency: {fileID: 2800000, guid: cacbda78d462c744499e8adb7ad49c33, type: 3}
+    instantiationMode: 0
+  - dependency: {fileID: 2100000, guid: 05ad2ebcdf1a89f49a4804ae5d5dcde3, type: 2}
+    instantiationMode: 0
+  - dependency: {fileID: 2100000, guid: d05270c112d707e4a910382493edb56a, type: 2}
+    instantiationMode: 0
+  - dependency: {fileID: 2100000, guid: 2bbff6dea4efeb1408de20350fb62153, type: 2}
+    instantiationMode: 0
+  - dependency: {fileID: 8600000, guid: fa064090064823b44ba22f243b7685d6, type: 2}
+    instantiationMode: 1
+  - dependency: {fileID: 862944744275824664, guid: 28c9b0658cc5b11418a59b5ce9256b54, type: 3}
+    instantiationMode: 0
+  - dependency: {fileID: 2100000, guid: 4ddec45b1570ac64f8bad7deda5a4ae7, type: 2}
+    instantiationMode: 0
+  - dependency: {fileID: 2100000, guid: aa3ae51fd10de534f92ceab7ae55586b, type: 2}
+    instantiationMode: 0
+  templatePipeline: {fileID: 0}
+  badge: {fileID: 0}
+  addToDefaults: 0

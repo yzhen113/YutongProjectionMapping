@@ -10,12 +10,6 @@ public class Chicken : MonoBehaviour
     private float rotationCooldown = 0.5f; // Prevent rapid rotation
     private float lastRotationTime = -1f;
     
-    /// <summary>
-    /// Z rotation we want to maintain so the chicken is always visible from
-    /// a bird's‑eye / top‑down view.
-    /// </summary>
-    private const float TopDownZRotation = 90f;
-
     void Start()
     {
         // Get or add Rigidbody component
@@ -25,13 +19,8 @@ public class Chicken : MonoBehaviour
             rb = gameObject.AddComponent<Rigidbody>();
         }
         
-        // Ensure Rigidbody can rotate on Y axis (we still want to turn around on fences)
+        // Ensure Rigidbody can rotate on Y axis
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezePositionY;
-
-        // Top-down 2D style: rotate chicken so its full body is visible from above.
-        // We only adjust visual orientation; movement still uses transform.forward.
-        var euler = transform.rotation.eulerAngles;
-        transform.rotation = Quaternion.Euler(0f, euler.y, TopDownZRotation);
         
         // Ensure the chicken has a collider for collision detection
         if (GetComponent<Collider>() == null)
@@ -66,45 +55,51 @@ public class Chicken : MonoBehaviour
     
     void OnCollisionEnter(Collision collision)
     {
-        GameObject otherObject = collision.gameObject;
-
-        // Fence: always turn immediately (no cooldown) so chickens never get stuck
-        if (IsFence(otherObject))
+        // Check if enough time has passed since last rotation
+        if (Time.time - lastRotationTime < rotationCooldown)
         {
-            Rotate180Degrees(ignoreCooldown: true);
             return;
         }
-
-        // Chicken: use cooldown to prevent rapid flip-flop when two chickens meet
-        if (Time.time - lastRotationTime < rotationCooldown)
-            return;
-
+        
+        GameObject otherObject = collision.gameObject;
+        
+        // First check if collision is with another chicken
         if (IsChicken(otherObject))
         {
+            // Both chickens turn 180 degrees
             Rotate180Degrees();
+            
+            // Also make the other chicken turn 180 degrees
             Chicken otherChicken = otherObject.GetComponent<Chicken>();
             if (otherChicken != null)
+            {
                 otherChicken.Rotate180Degrees();
+            }
+            return;
+        }
+        
+        // Check if the collision is with a fence (check both object name and parent)
+        GameObject fenceObject = collision.gameObject;
+        bool isFence = false;
+        
+        // Check the collided object's name
+        if (fenceObject.name.Contains("Fence"))
+        {
+            isFence = true;
+        }
+        // Also check parent object name (fences might be children)
+        else if (fenceObject.transform.parent != null && fenceObject.transform.parent.name.Contains("Fence"))
+        {
+            isFence = true;
+        }
+        
+        if (isFence)
+        {
+            // Turn 180 degrees away from the fence
+            Rotate180Degrees();
         }
     }
     
-    /// <summary>
-    /// Returns true if the object is (or is a child of) a fence, so we turn around.
-    /// Checks tag "Fence" and walks up the hierarchy for names containing "Fence".
-    /// </summary>
-    private bool IsFence(GameObject obj)
-    {
-        if (obj == null) return false;
-        if (obj.CompareTag("Fence")) return true;
-        Transform t = obj.transform;
-        while (t != null)
-        {
-            if (t.name.Contains("Fence")) return true;
-            t = t.parent;
-        }
-        return false;
-    }
-
     private bool IsChicken(GameObject obj)
     {
         // Check if the object has a Chicken component
@@ -128,27 +123,26 @@ public class Chicken : MonoBehaviour
         return false;
     }
     
-    /// <param name="ignoreCooldown">If true, rotate even during cooldown (used for fence so chickens don't get stuck).</param>
-    public void Rotate180Degrees(bool ignoreCooldown = false)
+    public void Rotate180Degrees()
     {
-        if (!ignoreCooldown && Time.time - lastRotationTime < rotationCooldown)
+        // Check if enough time has passed since last rotation
+        if (Time.time - lastRotationTime < rotationCooldown)
+        {
             return;
-
+        }
+        
         isRotating = true;
         lastRotationTime = Time.time;
         
         // Rotate the Rigidbody (not just transform) to ensure physics respects the rotation
-        // but keep the Z rotation fixed so the chicken always stays at a top-down angle.
         float currentY = rb.rotation.eulerAngles.y;
         float newY = currentY + 180f;
-
-        Quaternion newRot = Quaternion.Euler(0f, newY, TopDownZRotation);
-
+        
         // Apply rotation to Rigidbody
-        rb.rotation = newRot;
-
+        rb.rotation = Quaternion.Euler(0, newY, 0);
+        
         // Also update transform to ensure consistency
-        transform.rotation = newRot;
+        transform.rotation = Quaternion.Euler(0, newY, 0);
         
         // Stop current velocity to prevent immediate re-collision
         rb.linearVelocity = Vector3.zero;
